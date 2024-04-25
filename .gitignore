@@ -1,0 +1,4 @@
+*.exe
+tree-sitter
+tree-sitter-cpp
+.vscode
