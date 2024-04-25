@@ -1,19 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-
-#define SIZE 1000
-
-typedef struct Entry
-{
-    char *key;
-    char *value;
-    struct Entry *next;
-} Entry;
-
-typedef struct
-{
-    Entry **entries;
-} HashMap;
+#include "hashmap.h"
 
 HashMap *createHashMap()
 {
@@ -61,15 +48,4 @@ void freeHashMap(HashMap *map)
     }
     free(map->entries);
     free(map);
-}
-
-int main()
-{
-    HashMap *myMap = createHashMap();
-    insert(myMap, "name", "dimon");
-    insert(myMap, "surname", "dimon123");
-    printf("%s\n%s\n", search(myMap, "name"), search(myMap, "surname"));
-    freeHashMap(myMap);
-
-    return 0;
 }

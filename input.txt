@@ -1,0 +1,21 @@
+#include <iostream>
+using namespace std;
+
+
+int main()
+{
+    cout << "wassup g";
+    return 0;
+}
+
+void greet() {
+    cout << "top g";
+}
+
+int test() {
+    cout << "top g";
+}
+
+string top_g() {
+    cout << "top g";
+}
