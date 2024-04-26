@@ -1,4 +1,14 @@
-*.exe
+# Tools/libraries used
 tree-sitter
 tree-sitter-cpp
+sqlite
+
+# Settings for vscode
 .vscode
+
+# All the test and built files
+*.exe
+test.*
+
+# The database file
+inputs.db

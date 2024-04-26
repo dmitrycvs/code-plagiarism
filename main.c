@@ -1,53 +1,64 @@
-#include <assert.h>
-#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <tree_sitter/api.h>
+#include <sqlite3.h>
 #include "hashmap.h"
 
 const TSLanguage *tree_sitter_cpp(void);
 
-char *read_file(const char *filename)
+void extractDataFromDatabase()
 {
-    FILE *file = fopen(filename, "r");
-    if (file == NULL)
+    sqlite3 *db;
+    char *zErrMsg = 0;
+    int rc;
+    char *sql;
+    sqlite3_stmt *stmt;
+
+    rc = sqlite3_open("inputs.db", &db);
+    if (rc)
     {
-        fprintf(stderr, "Failed to open the file.\n");
-        return NULL;
+        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+        exit(1);
+    }
+    else
+    {
+        fprintf(stderr, "Opened database successfully\n");
     }
 
-    fseek(file, 0, SEEK_END);
-    long file_size = ftell(file);
-    fseek(file, 0, SEEK_SET);
-
-    char *buffer = (char *)malloc(file_size + 1);
-    if (buffer == NULL)
+    sql = "SELECT * FROM files";
+    rc = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
+    if (rc != SQLITE_OK)
     {
-        fclose(file);
-        fprintf(stderr, "Memory allocation failed.\n");
-        return NULL;
+        fprintf(stderr, "SQL error: %s\n", zErrMsg);
+        sqlite3_free(zErrMsg);
     }
 
-    size_t bytes_read = fread(buffer, 1, file_size, file);
-    if (bytes_read != file_size)
+    while ((rc = sqlite3_step(stmt)) == SQLITE_ROW)
     {
-        fclose(file);
-        free(buffer);
-        fprintf(stderr, "Error reading file.\n");
-        return NULL;
+        int num_columns = sqlite3_column_count(stmt);
+        for (int j = 0; j < num_columns; j++)
+        {
+            const unsigned char *column_text = sqlite3_column_text(stmt, j);
+            if (column_text)
+            {
+                char *data = (char *)malloc((strlen(column_text) + 1) * sizeof(char));
+                strcpy(data, (const char *)column_text);
+                printf("Data from database: %s\n", data);
+                free(data);
+            }
+        }
     }
 
-    buffer[file_size] = '\0';
-
-    fclose(file);
-    return buffer;
+    sqlite3_finalize(stmt);
+    sqlite3_close(db);
 }
 
 void extract_function_information(TSNode node, char *code)
 {
     if (strcmp(ts_node_type(node), "function_definition") == 0)
     {
-        TSNode function_type_node = ts_node_named_child(node, 0);
+        TSNode function_type_node = ts_node_child(node, 0);
         uint32_t start_byte = ts_node_start_byte(function_type_node);
         uint32_t end_byte = ts_node_end_byte(function_type_node);
 
@@ -91,13 +102,7 @@ int main()
 
     ts_parser_set_language(parser, tree_sitter_cpp());
 
-    const char *filename = "input.txt";
-    char *source_code = read_file(filename);
-
-    if (source_code == NULL)
-    {
-        return 1;
-    }
+    char *source_code;
 
     TSTree *tree = ts_parser_parse_string(
         parser,
@@ -112,7 +117,7 @@ int main()
     ts_tree_delete(tree);
     ts_parser_delete(parser);
 
-    free(source_code);
+    extractDataFromDatabase();
 
     HashMap *myMap = createHashMap();
     insert(myMap, "name", "dimon");
