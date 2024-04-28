@@ -24,18 +24,44 @@ void insert(HashMap *map, char *key, char *value)
 {
     int index = hash(key);
     Entry *entry = (Entry *)malloc(sizeof(Entry));
+    if (entry == NULL)
+    {
+        printf("Memory allocation failed!\n");
+        exit(1);
+    }
+
     entry->key = key;
     entry->value = value;
+    entry->next = NULL;
 
-    map->entries[index] = entry;
+    if (map->entries[index] == NULL)
+    {
+        map->entries[index] = entry;
+    }
+    else
+    {
+        Entry *current = map->entries[index];
+        while (current->next != NULL)
+        {
+            current = current->next;
+        }
+        current->next = entry;
+    }
 }
 
 char *search(HashMap *map, char *key)
 {
     int index = hash(key);
-    if (index)
-        return map->entries[index]->value;
 
+    Entry *current = map->entries[index];
+    while (current != NULL)
+    {
+        if (strcmp(current->key, key) == 0)
+        {
+            return current->value;
+        }
+        current = current->next;
+    }
     return "";
 }
 

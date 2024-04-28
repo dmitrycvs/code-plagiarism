@@ -12,10 +12,10 @@ void greet() {
     cout << "top g";
 }
 
-int test() {
+char top_g() {
     cout << "top g";
 }
 
-string top_g() {
+int test() {
     cout << "top g";
 }

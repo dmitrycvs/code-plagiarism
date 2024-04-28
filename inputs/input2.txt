@@ -11,3 +11,11 @@ int main()
 void greet() {
     cout << "top g";
 }
+
+char top_g() {
+    cout << "top g";
+}
+
+int* test() {
+    cout << "top g";
+}
