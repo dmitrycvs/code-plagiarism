@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "hashmap.h"
 
 HashMap *createHashMap()
@@ -20,7 +21,7 @@ int hash(char *key)
     return hash % SIZE;
 }
 
-void insert(HashMap *map, char *key, char *value)
+void insertInHashMap(HashMap *map, char *key, char *value)
 {
     int index = hash(key);
     Entry *entry = (Entry *)malloc(sizeof(Entry));
@@ -30,7 +31,7 @@ void insert(HashMap *map, char *key, char *value)
         exit(1);
     }
 
-    entry->key = key;
+    entry->key = strdup(key);
     entry->value = value;
     entry->next = NULL;
 
@@ -49,7 +50,7 @@ void insert(HashMap *map, char *key, char *value)
     }
 }
 
-char *search(HashMap *map, char *key)
+char *searchInHashMap(HashMap *map, char *key)
 {
     int index = hash(key);
 
@@ -69,8 +70,14 @@ void freeHashMap(HashMap *map)
 {
     for (int i = 0; i < SIZE; i++)
     {
-        if (map->entries[i] != NULL)
-            free(map->entries[i]);
+        Entry *current = map->entries[i];
+        while (current != NULL)
+        {
+            Entry *next = current->next;
+            free(current->key);
+            free(current);
+            current = next;
+        }
     }
     free(map->entries);
     free(map);

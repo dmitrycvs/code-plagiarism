@@ -1,15 +1,16 @@
 #ifndef LINKED_LIST_H
 #define LINKED_LIST_H
 
+#include "hashmap.h"
+
 typedef struct Node
 {
-    int data;
+    HashMap *data;
     struct Node *next;
 } Node;
 
-Node *createNode(int data);
-void insertInList(Node **headRef, int data);
-void displayList(Node *head);
+Node *createNode(HashMap *data);
+void insertInList(Node **headRef, HashMap *data);
 void deleteList(Node **headRef);
 void changeThePointerOfList(Node **headRef);
 

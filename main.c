@@ -3,15 +3,32 @@
 #include <string.h>
 #include <tree_sitter/api.h>
 #include <sqlite3.h>
-#include "hashmap.h"
+#include "linkedlist.h"
 
 const TSLanguage *tree_sitter_cpp(void);
 
-void extractFunctionInformation(TSNode node, char *code)
+void incrementCount(HashMap *Map, char *countName)
 {
-    unsigned for_count = 0;
-    unsigned if_count = 0;
+    char *count = searchInHashMap(Map, countName);
+    if (count)
+    {
+        int countNumber = atoi(count) + 1;
+        char *str = (char *)malloc((strlen(count) + 2) * sizeof(char));
+        sprintf(str, "%d", countNumber);
+        str[strlen(str)] = '\0';
 
+        insertInHashMap(Map, countName, str);
+        free(str);
+    }
+    else
+    {
+        insertInHashMap(Map, countName, "1");
+    }
+}
+
+void extractFunctionInformation(TSNode node, char *code, Node *head)
+{
+    HashMap *Map = head->data;
     if (strcmp(ts_node_type(node), "function_definition") == 0)
     {
         TSNode function_type_node = ts_node_child(node, 0);
@@ -29,43 +46,39 @@ void extractFunctionInformation(TSNode node, char *code)
         snprintf(function_type, 20, "%.*s", end_byte - start_byte, code + start_byte);
         if (strcmp(function_type, "string") == 0 || strcmp(function_type, "char") == 0)
         {
-            printf("Function: %s\n", function_type);
+            incrementCount(Map, "return_function_string");
         }
         else if (strcmp(function_type, "void") == 0)
         {
-            printf("Function: %s\n", function_type);
+            incrementCount(Map, "return_function_void");
         }
         // For numbers
         else
         {
-            printf("Function: %s\n", function_type);
+            incrementCount(Map, "return_function_number");
         }
 
         free(function_type);
     }
-
-    // To add these values into a hashmap
+    // Add also for while/do while and else/else if
     else if (strcmp(ts_node_type(node), "for_statement") == 0)
-        for_count++;
-    else if (strcmp(ts_node_type(node), "if_statement") == 0)
-        if_count++;
-
-    else if (strcmp(ts_node_type(node), "return_statement") == 0)
     {
-        TSNode child_node = ts_node_child(node, 1);
-        const char *child_type = ts_node_type(child_node);
-        // The value of the return statement is in the child_type variable
+        incrementCount(Map, "for_count");
+    }
+    else if (strcmp(ts_node_type(node), "if_statement") == 0)
+    {
+        incrementCount(Map, "if_count");
     }
 
     uint32_t child_count = ts_node_child_count(node);
     for (uint32_t i = 0; i < child_count; ++i)
     {
         TSNode child = ts_node_child(node, i);
-        extractFunctionInformation(child, code);
+        extractFunctionInformation(child, code, head);
     }
 }
 
-void extractDataFromDatabase()
+void extractDataFromDatabase(Node *head)
 {
     sqlite3 *db;
     char *zErrMsg = 0;
@@ -105,11 +118,16 @@ void extractDataFromDatabase()
                 strlen(data));
 
             TSNode root_node = ts_tree_root_node(tree);
-            extractFunctionInformation(root_node, data);
+
+            HashMap *Map = createHashMap();
+            insertInList(&head, Map);
+
+            extractFunctionInformation(root_node, data, head);
 
             ts_tree_delete(tree);
             ts_parser_delete(parser);
             free(data);
+            freeHashMap(Map);
             break;
         }
     }
@@ -120,14 +138,11 @@ void extractDataFromDatabase()
 
 int main()
 {
+    Node *head = NULL;
+    extractDataFromDatabase(head);
+    printf("%s", searchInHashMap(head->data, "return_function_number"));
 
-    extractDataFromDatabase();
-
-    HashMap *myMap = createHashMap();
-    insert(myMap, "name", "dimon");
-    insert(myMap, "surname", "dimon123");
-    // printf("%s\n%s\n", search(myMap, "name"), search(myMap, "surname"));
-    freeHashMap(myMap);
+    deleteList(&head);
 
     return 0;
 }

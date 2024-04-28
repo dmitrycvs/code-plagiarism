@@ -19,8 +19,8 @@ typedef struct
 
 HashMap *createHashMap();
 int hash(char *key);
-void insert(HashMap *map, char *key, char *value);
-char *search(HashMap *map, char *key);
+void insertInHashMap(HashMap *map, char *key, char *value);
+char *searchInHashMap(HashMap *map, char *key);
 void freeHashMap(HashMap *map);
 
 #endif /* HASHMAP_H */
