@@ -32,7 +32,7 @@ void insertInHashMap(HashMap *map, char *key, char *value)
     }
 
     entry->key = strdup(key);
-    entry->value = value;
+    entry->value = strdup(value);
     entry->next = NULL;
 
     if (map->entries[index] == NULL)
@@ -81,4 +81,36 @@ void freeHashMap(HashMap *map)
     }
     free(map->entries);
     free(map);
+}
+
+void incrementCount(HashMap *Map, char *countName)
+{
+    char *count = searchInHashMap(Map, countName);
+    if (count)
+    {
+        int countNumber = atoi(count) + 1;
+        char *str = (char *)malloc((strlen(count) + 2) * sizeof(char));
+        sprintf(str, "%d", countNumber);
+        str[strlen(str)] = '\0';
+
+        int index = hash(countName);
+        Entry *current = Map->entries[index];
+        while (current != NULL)
+        {
+            if (strcmp(current->key, countName) == 0)
+            {
+                free(current->value);
+                current->value = str;
+                return;
+            }
+            current = current->next;
+        }
+
+        insertInHashMap(Map, countName, str);
+        free(str);
+    }
+    else
+    {
+        insertInHashMap(Map, countName, "1");
+    }
 }

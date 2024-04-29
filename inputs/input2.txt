@@ -16,6 +16,6 @@ char top_g() {
     cout << "top g";
 }
 
-int* test() {
+int test() {
     cout << "top g";
 }

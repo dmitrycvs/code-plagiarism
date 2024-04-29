@@ -1,9 +1,7 @@
-// hashmap.h
-
 #ifndef HASHMAP_H
 #define HASHMAP_H
 
-#define SIZE 1000
+#define SIZE 10
 
 typedef struct Entry
 {
@@ -22,5 +20,6 @@ int hash(char *key);
 void insertInHashMap(HashMap *map, char *key, char *value);
 char *searchInHashMap(HashMap *map, char *key);
 void freeHashMap(HashMap *map);
+void incrementCount(HashMap *Map, char *countName);
 
 #endif /* HASHMAP_H */
