@@ -137,7 +137,7 @@ WordFreq *createWordFreqArray(const char *str, int *size)
     }
 
     char word[MAX_WORD_LENGTH];
-    const char *delimiters = " ;()";
+    const char *delimiters = " ;(){}";
     char *token = strtok((char *)str, delimiters);
     while (token != NULL)
     {
@@ -233,7 +233,7 @@ int main()
     {
         int count1 = atoi(searchInHashMap(array[0], elements[i]));
         int count2 = atoi(searchInHashMap(array[1], elements[i]));
-        if (!count1 && !count2)
+        if (!count1 || !count2)
             continue;
         if (count1 <= count2)
         {
@@ -241,14 +241,13 @@ int main()
         }
         else
         {
-            ASTWeigth = count1 / count2;
+            ASTWeigth = count2 / count1;
         }
     }
-    ASTWeigth *= 30;
+    ASTWeigth *= 40;
 
-    double cosineWeigth = cosineSimilarity(arrayWordFreq[0], size1, arrayWordFreq[1], size2) * 70;
+    double cosineWeigth = cosineSimilarity(arrayWordFreq[0], size1, arrayWordFreq[1], size2) * 60;
     printf("Final similarity between the provided codes is: %.2f\n", cosineWeigth + ASTWeigth);
-
     for (int i = 0; i < arr_size; i++)
     {
         free(arrayWordFreq[i]);

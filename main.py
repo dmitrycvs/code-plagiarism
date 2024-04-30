@@ -21,6 +21,7 @@ for path in file_paths:
     with open(path, "r") as file:
         content = file.read()
         if content:
+            content = content.replace("\n", " ").replace("\t", " ")
             cursor.execute("INSERT INTO files (content) VALUES (?)", (content,))
 
 conn.commit()
